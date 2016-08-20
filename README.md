@@ -2,7 +2,7 @@
 This is a reverse proxy server for the San Francisco based non-profit internet radio station SOMA FM.
 
 ## Reverse Proxy
-From [Wikipedia - Reverse proxy](https://en.wikipedia.org/wiki/Reverse_proxy)
+From [Wikipedia - Reverse proxy](https://en.wikipedia.org/wiki/Reverse_proxy):
 >In computer networks, a reverse proxy is a type of proxy server that retrieves resources on behalf of a client from one or more
 servers. These resources are then returned to the client as if they originated from the proxy server itself.[1] While a forward proxy
 acts as an intermediary for its associated clients to contact any server, a reverse proxy acts as an intermediary for its associated
@@ -47,3 +47,34 @@ DirectoryIndex index.html
     AllowOverride All
 </Directory>
 ```
+
+Not included here are the `<VirtualHost *></VirtualHost>` and `ServerName` directives, which were set by alwaysdata.
+
+These directives:
+* set the root URL `/` to the `/home/breaking-bytes/www` directory on the server,
+* will serve any document found called `index.html`,
+* allow anyone to access the website,
+* reverse and pass the SOMA FM IndiePop icecast as `/somafm/indiepop` and
+* PopTron icecast as `/somafm/poptron`
+
+Therefore, anyone pointing their browser to
+[breaking-bytes.alwaysdata.net/somafm/indiepop](http://breaking-bytes.alwaysdata.net/somafm/indiepop) can listen to the stream
+as if they were on the SOMA FM website listening to Indie Pop Rocks!
+
+#### Forward Proxy
+From [Wikipedia - Proxy servery](https://en.wikipedia.org/wiki/Proxy_server):
+>A forward proxy is an Internet-facing proxy used to retrieve from a wide range of sources (in most cases anywhere on the Internet).
+
+From [Apache - `mod_proxy`](https://httpd.apache.org/docs/current/mod/mod_proxy.html):
+>An ordinary forward proxy is an intermediate server that sits between the client and the origin server. In order to get content from
+the origin server, the client sends a request to the proxy naming the origin server as the target. The proxy then requests the content
+from the origin server and returns it to the client. The client must be specially configured to use the forward proxy to access other
+sites.
+
+## Static Site
+To make the website look good I use [Bootstrap](http://getbootstrap.com/) to create a
+[navbar](http://getbootstrap.com/components/#navbar) with buttons to each station and a
+[jumbotron](http://getbootstrap.com/components/#jumbotron) to say something about the website. I used cdn to get the Bootstrap
+and JQuery resources. The markup for this is in [`index.html'](./www/index.html).
+
+## Song History Application
