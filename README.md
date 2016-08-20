@@ -76,7 +76,7 @@ as if they were on the SOMA FM website listening to Indie Pop Rocks!
 
 #### Forward Proxy
 
-From [Wikipedia - Proxy servery](https://en.wikipedia.org/wiki/Proxy_server):
+From [Wikipedia - Proxy server](https://en.wikipedia.org/wiki/Proxy_server):
 
 >A forward proxy is an Internet-facing proxy used to retrieve from a wide range of sources (in most cases anywhere on the Internet).
 
