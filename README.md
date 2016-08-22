@@ -7,12 +7,14 @@ This is a reverse proxy server for the San Francisco based non-profit internet r
 From [Wikipedia - Reverse proxy](https://en.wikipedia.org/wiki/Reverse_proxy):
 
 >In computer networks, a reverse proxy is a type of proxy server that retrieves resources on behalf of a client from one or more
-servers. These resources are then returned to the client as if they originated from the proxy server itself.[1] While a forward proxy
+servers. These resources are then returned to the client as if they originated from the proxy server itself.<sup>[1][1]</sup> While a forward proxy
 acts as an intermediary for its associated clients to contact any server, a reverse proxy acts as an intermediary for its associated
 servers to be contacted by any client.
 
 >Quite often, popular web servers utilize reverse-proxying functionality, acting as shields for application frameworks with weaker
 HTTP capabilities.
+
+[1]: http://httpd.apache.org/docs/current/mod/mod_proxy.html#forwardreverse
 
 ![Wikipedia - reverse proxy](https://upload.wikimedia.org/wikipedia/commons/6/67/Reverse_proxy_h2g2bob.svg)
 
@@ -31,7 +33,7 @@ headers sent from a reverse proxied server.
 #### Configuration
 
 Configure the reverse proxy in the Apache `httpd.conf` file. This file may called different names, _eg_: `apache.conf` or you may
-include it from another file _eg_:`sites.conf` by with `Include "sites.conf"`. On some server shares, like
+include it from another file _eg_:`sites.conf` with `Include "sites.conf"`. On some server shares, like
 [alwaysdata](https://www.alwaysdata.com/en/), there may be an [admin page](https://admin.alwaysdata.com/) where you may be able to
 add a custom configuration to your Apache sites.
 
@@ -92,7 +94,7 @@ sites.
 To make the website look good I use [Bootstrap](http://getbootstrap.com/) to create a
 [navbar](http://getbootstrap.com/components/#navbar) with buttons to each station and a
 [jumbotron](http://getbootstrap.com/components/#jumbotron) to say something about the website. I used cdn to get the Bootstrap
-and JQuery resources. The markup for this is in [`index.html'](./www/index.html).
+and JQuery resources. The markup for this is in [`index.html`](./www/index.html).
 
 ## Song History Application
 
@@ -111,12 +113,48 @@ to find another solution.
 I also can't use JavaScript to scrape the song history from SOMA FM, because cross-domain is normally blocked by most browsers.
 Even if I could find a work around for cross-domain requests, the song history may still be blocked for remote users. So I need
 a server side solution like a Python application that can get the song history from SOMA FM and dynamically re-render it from
-this server. On my server I can use FastCGI to execute a Python script. The Python script uses the Python
-[flup package](https://www.saddi.com/software/flup/) to start an WSGI Server. 
+this server. On my server I can use [FastCGI](https://en.wikipedia.org/wiki/FastCGI) to execute a Python script. The Python script
+uses the Python [flup package](https://www.saddi.com/software/flup/) to start an
+[WSGI Server](https://en.wikipedia.org/wiki/Web_Server_Gateway_Interface).
 
 #### Installations
+
+I don't have root on the server share, so I use [cURL](https://curl.haxx.se/) to download the tarballs from the
+[Cheese Shop](https://pypi.python.org/pypi), extract them using [`tar -xf <archive>`](https://www.gnu.org/software/tar/)
+and install them using the
+[alternate `--user` install scheme](https://docs.python.org/2/install/#alternate-installation-the-user-scheme). The
+[`pip`](https://pip.pypa.io/en/stable/) version on my server share is too old, so I use
+[distutils](https://docs.python.org/2.7/library/distutils.html), _ie_: `~$ python setup.py install --user` in the extracted
+package distribution folder. This installs the packages into `~/.local/lib/python2.6/site-packages` which is automatically
+included on my `PYTHONPATH`.
 
 * [flup](https://pypi.python.org/pypi/flup/1.0.2)
 * [Requests](https://pypi.python.org/pypi/requests)
 * [BeautifulSoup4](https://pypi.python.org/pypi/beautifulsoup4)
+
+#### FCGI Configuration
+
+Apache [`mod_fcgid`](http://httpd.apache.org/mod_fcgid/mod/mod_fcgid.html) has the directives that control how to setup FastCGI
+on Apache HTTPD. The following settings were precofigured in the global directives section of the custom Apache configuration on
+the alwaysdata admin site page.
+
+```apache
+# mod_fcgid
+LoadModule fcgid_module /usr/lib/apache2/modules/mod_fcgid.so
+SocketPath run/fcgidsock
+
+FcgidMaxProcesses           20
+FcgidMinProcessesPerClass   1
+FcgidMaxProcessesPerClass   20
+FcgidMaxRequestsPerProcess  3000
+FcgidBusyTimeout            900
+FcgidIOTimeout              900
+FcgidOutputBufferSize       131072
+FcgidMaxRequestInMem        524288
+FcgidMaxRequestLen          1073741824
+
+FcgidInitialEnv             LANG en_US.UTF-8
+FcgidInitialEnv             LC_ALL en_US.UTF-8
+FcgidPassHeader             Authorization
+```
 
