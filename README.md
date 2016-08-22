@@ -199,9 +199,7 @@ if __name__ == '__main__':
     WSGIServer(app).run()
 ```
 
-Where `app` is the method that I want to run. That app must take 2 variables: `environ` and `start_responnse`, and the app must define
-`start_response`
-
-.
+Where `app` is the method that I want to run. The [web server gateway interface (WSGI) protocol](https://en.wikipedia.org/wiki/Web_Server_Gateway_Interface) describes how this app should be formatted. In particular the app must take 2 variables: `environ` and `start_responnse`, and the app must define
+`start_response(<HTTP/1.1 response>, [(<key>, <value>)])`.
 
 There is also a deprecated `mod_fastcgi` which is different from Apache Software Foundation (ASF) [`mod_fcgid`](https://httpd.apache.org/mod_fcgid/).
