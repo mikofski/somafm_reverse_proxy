@@ -32,29 +32,40 @@ def app(environ, start_response):
     ]
     with open(os.path.join(dirname, '..', 'www', 'index.html'), 'r') as f:
         index = bs4.BeautifulSoup(f.read())
+    logger.debug('index:\n%r', index)
 
     new_table = index.new_tag('table')
-    new_table['class'] = 'table'
+    new_table['class'] = 'table table-striped'
 
+    new_head = index.new_tag('thead')
     new_row = index.new_tag('tr')
     for c in colheaders:
-        new_data = index.new_tag('td')
+        new_data = index.new_tag('th')
         new_data.string = c
         new_row.append(new_data)
-    new_table.append(new_row)
+    new_head.append(new_row)
+    new_table.append(new_head)
 
+    new_body = index.new_tag('tbody')
     for r in data:
         new_row = index.new_tag('tr')
         for d in r:
-        new_data = index.new_tag('td')
-        new_data.string = d
-        new_row.append(new_data)
-        new_table.append(new_row)
+            new_data = index.new_tag('td')
+            new_data.string = d
+            new_row.append(new_data)
+        new_body.append(new_row)
+    new_table.append(new_body)
 
     logger.debug('index.body.contents')
     jumbotron = index.body.contents[5]
     new_div = index.new_tag('div')
     new_div['class'] = 'container'
+    new_h3 = index.new_tag('h3')
+    new_a = index.new_tag('a')
+    new_a['href'] = '/songhistory/indiepop'
+    new_a.string = 'Indie Pop Rocks!'
+    new_h3.append(new_a)
+    new_div.append(new_h3)
     new_div.append(new_table)
     jumbotron.insert_after(new_div)
 
