@@ -158,9 +158,7 @@ FcgidInitialEnv             LC_ALL en_US.UTF-8
 FcgidPassHeader             Authorization
 ```
 
-These directives load the module, set the socket path, number of processes and other parameters. Since FCGI communicates with your script through a socket, you must provide a location where the pipe or socket semiphore will be stored.
-
-There is also a deprecated `mod_fastcgi` which is different from Apache Software Foundation (ASF) [`mod_fcgid`](https://httpd.apache.org/mod_fcgid/).
+These directives load the module, set the socket path, number of processes and other parameters. Since FCGI communicates with your script through a [socket](https://en.wikipedia.org/wiki/Unix_domain_socket) or [pipe](https://en.wikipedia.org/wiki/Named_pipe), you must provide a location where the pipe or socket file can be stored.
 
 There are several steps to get the ASF `mod_fcgid` to work. [Graham Dumpleton describes some of them in his blog.](http://blog.dscpl.com.au/2011/09/why-is-wsgi-deployment-under-fastcgi-so.html). Apache also has a tutorial on [serving dynamic content](http://httpd.apache.org/docs/current/howto/cgi.html). Here are some common issues:
 
@@ -169,5 +167,41 @@ There are several steps to get the ASF `mod_fcgid` to work. [Graham Dumpleton de
 3. Use [`Options ExecCGI`](https://httpd.apache.org/docs/2.4/mod/core.html#Options) to allow scripts to execute.
 4. Use [`ScriptAlias`](https://httpd.apache.org/docs/current/mod/mod_alias.html#scriptalias) or [`Rewrite`](http://httpd.apache.org/docs/current/mod/mod_rewrite.html) to alias or rewrite a URL to a script file and to pass arguments.
 
+These directives should look like these:
+
+```apache
+# instead of htaccess and rewrite
+# Alias /songhistory/ /home/breaking-bytes/somafm/songhistory/
+<Location /songhistory/>
+  Order allow,deny
+  Allow from All
+  Options ExecCGI
+  AddHandler fcgid-script .fcgi .py
+</Location>
+
+ScriptAlias /songhistory/ /home/breaking-bytes/somafm/songhistory/somafm.fcgi
+```
+
+#### The Application
+
+FCGI differs from CGI in that it expects an application that runs in a separate process and that communicates according to its predefined format. The flup python package creates a WSGI server that communicates with FCGI through the socket in the expected manner. The song history application is in this repository at `songhistory/somafm.fcgi`. Note that it ends with a if name is main section that calls flup and starts the WSGI servier.
+
+```python
+def app(environ, start_response):
+    logger.debug('environ:\n%r', environ)
+    start_response('200 OK', [('Content-Type', 'text/html')])
+
+    ... do stuff ...
 
 
+
+if __name__ == '__main__':
+    WSGIServer(app).run()
+```
+
+Where `app` is the method that I want to run. That app must take 2 variables: `environ` and `start_responnse`, and the app must define
+`start_response`
+
+.
+
+There is also a deprecated `mod_fastcgi` which is different from Apache Software Foundation (ASF) [`mod_fcgid`](https://httpd.apache.org/mod_fcgid/).
