@@ -25,7 +25,7 @@ and reverse proxy features. The main directives required depend on whether the p
 
 #### Reverse Proxy Directives
 
-* [`ProxyPass`](https://httpd.apache.org/docs/trunk/mod/mod_proxy.html#proxypass) - Maps remote serverse into the local server URL
+* [`ProxyPass`](https://httpd.apache.org/docs/trunk/mod/mod_proxy.html#proxypass) - Maps remote servers into the local server URL
 space.
 * [`ProxyPassReverse`](https://httpd.apache.org/docs/trunk/mod/mod_proxy.html#proxypassreverse) - Adjusts the URL in HTTP response
 headers sent from a reverse proxied server.
@@ -53,7 +53,7 @@ ProxyPassReverse /songhistory/indiepop http://somafm.com/indiepop/songhistory.ht
 ProxyPass /songhistory/poptron http://somafm.com/poptron/songhistory.html
 ProxyPassReverse /songhistory/poptron http://somafm.com/poptron/songhistory.html
 
-DocumentRoot /home/breaking-bytes/www
+DocumentRoot /home/breaking-bytes/somafm/www
 DirectoryIndex index.html
 <Directory />
     AllowOverride All
@@ -64,9 +64,9 @@ Not included here are the `<VirtualHost *></VirtualHost>` and `ServerName` direc
 
 These directives:
 
-* set the root URL `/` to the `/home/breaking-bytes/www` directory on the server,
+* set the root URL `/` to the `/home/breaking-bytes/somafm/www` directory on the server,
 * will serve any document found called `index.html`,
-* allow anyone to access the website,
+* allow `.htaccess` in any folder to [override all](https://httpd.apache.org/docs/current/mod/core.html#allowoverride),
 * reverse and pass the SOMA FM Indie Pop icecast as `/somafm/indiepop`,
 * PopTron icecast as `/somafm/poptron`,
 * reverse and pass the Indie Pop song history as `/songhistory/indiepop` and
@@ -157,4 +157,17 @@ FcgidInitialEnv             LANG en_US.UTF-8
 FcgidInitialEnv             LC_ALL en_US.UTF-8
 FcgidPassHeader             Authorization
 ```
+
+These directives load the module, set the socket path, number of processes and other parameters. Since FCGI communicates with your script through a socket, you must provide a location where the pipe or socket semiphore will be stored.
+
+There is also a deprecated `mod_fastcgi` which is different from Apache Software Foundation (ASF) [`mod_fcgid`](https://httpd.apache.org/mod_fcgid/).
+
+There are several steps to get the ASF `mod_fcgid` to work. [Graham Dumpleton describes some of them in his blog.](http://blog.dscpl.com.au/2011/09/why-is-wsgi-deployment-under-fastcgi-so.html). Apache also has a tutorial on [serving dynamic content](http://httpd.apache.org/docs/current/howto/cgi.html). Here are some common issues:
+
+1. The `fcgi` script and the directory it's in must be executable.
+2. Use [`AddHandler`](https://httpd.apache.org/docs/current/mod/mod_mime.html#addhandler) to map the scripts to extensions.
+3. Use [`Options ExecCGI`](https://httpd.apache.org/docs/2.4/mod/core.html#Options) to allow scripts to execute.
+4. Use [`ScriptAlias`](https://httpd.apache.org/docs/current/mod/mod_alias.html#scriptalias) or [`Rewrite`](http://httpd.apache.org/docs/current/mod/mod_rewrite.html) to alias or rewrite a URL to a script file and to pass arguments.
+
+
 
